@@ -1,0 +1,26 @@
+{
+  "host": {
+    "label": "Host",
+    "type": "String",
+    "required": true,
+    "help": "The SAP-HCP Host to send data to."
+  },
+  "username": {
+    "label": "Username",
+    "type": "String",
+    "required": true,
+    "help": "The SAP-HCP account Username."
+  },
+  "password": {
+    "label": "Password",
+    "type": "Password",
+    "required": true,
+    "help": "The SAP-HCP Password."
+  },
+  "message_type": {
+    "label": "Message Type(ID)",
+    "type": "String",
+    "required": true,
+    "help": "The Message Type(ID) to use."
+  }
+}
