@@ -1,73 +1,74 @@
-'use strict';
+'use strict'
 
-var platform = require('./platform'),
-	isPlainObject = require('lodash.isplainobject'),
-    isEmpty = require('lodash.isempty'),
-    get = require('lodash.get'),
-    isArray = require('lodash.isarray'),
-	request = require('request'),
-    async = require('async'),
-    config;
+let reekoh = require('reekoh')
+let _plugin = new reekoh.plugins.Connector()
+let async = require('async')
+let isArray = require('lodash.isarray')
+let isPlainObject = require('lodash.isplainobject')
+let request = require('request')
 
 let sendData = (data, callback) => {
-    let device = data.rkh_device_info.device || data.device;
+  let device = data.rkhDeviceInfo.device || data.device
 
-    delete data.rkh_device_info;
-    delete data.device;
+  delete data.rkhDeviceInfo
+  delete data.device
 
-    request.post({
-        url: `https://${config.host}/com.sap.iotservices.mms/v1/api/http/data/${device}`,
-        json: {
-            mode: 'sync',
-            messageType: config.message_type,
-            messages: [data]
-        },
-        auth: {
-            user: config.username,
-            pass: config.password
-        }
-    }, (error, response, body) => {
-        if(!error){
-            platform.log(JSON.stringify({
-                title: 'SAP-HCP message sent.',
-                data: data
-            }));
-        }
-
-        callback(error);
-    });
-};
-
-platform.on('data', function (data) {
-    if(isPlainObject(data)){
-        sendData(data, (error) => {
-            if(error) {
-                console.error(error);
-                platform.handleException(error);
-            }
-        });
+  request.post({
+    url: `https://${_plugin.config.host}/com.sap.iotservices.mms/v1/api/http/data/${device}`,
+    json: {
+      mode: 'sync',
+      messageType: _plugin.config.messageType,
+      messages: [data]
+    },
+    auth: {
+      user: _plugin.config.username,
+      pass: _plugin.config.password
     }
-    else if(isArray(data)){
-        async.each(data, (datum, done) => {
-            sendData(datum, done);
-        }, (error) => {
-            if(error) {
-                console.error(error);
-                platform.handleException(error);
-            }
-        });
+  }, (error) => {
+    if (!error) {
+      _plugin.log(JSON.stringify({
+        title: 'SAP-HCP message sent.',
+        data: data
+      }))
     }
-    else
-        platform.handleException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data ' + data));
-});
 
-platform.once('close', function () {
-	platform.notifyClose();
-});
+    callback(error)
+  })
+}
 
-platform.once('ready', function (options) {
-    config = options;
+/**
+ * Emitted when device data is received.
+ * This is the event to listen to in order to get real-time data feed from the connected devices.
+ * @param {object} data The data coming from the device represented as JSON Object.
+ */
+_plugin.on('data', (data) => {
+  if (isPlainObject(data)) {
+    sendData(data, (error) => {
+      if (error) {
+        console.error(error)
+        _plugin.logException(error)
+      }
+    })
+  } else if (isArray(data)) {
+    async.each(data, (datum, done) => {
+      sendData(datum, done)
+    }, (error) => {
+      if (error) {
+        console.error(error)
+        _plugin.logException(error)
+      }
+    })
+  } else {
+    _plugin.logException(new Error('Invalid data received. Must be a valid Array/JSON Object. Data ' + data))
+  }
+})
 
-	platform.notifyReady();
-	platform.log('SAP-HCP Connector has been initialized.');
-});
+/**
+ * Emitted when the platform bootstraps the plugin. The plugin should listen once and execute its init process.
+ */
+_plugin.once('ready', () => {
+  _plugin.log('HCP-MMS Connector has been initialized.')
+  _plugin.emit('init')
+})
+
+module.exports = _plugin

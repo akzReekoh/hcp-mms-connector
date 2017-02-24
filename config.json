@@ -3,24 +3,31 @@
     "label": "Host",
     "type": "String",
     "required": true,
-    "help": "The SAP-HCP Host to send data to."
+    "help": "The SAP-HCP Host to send data to.",
+    "maxLength": 50,
+    "format": {
+      "pattern": "^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\\-]*[A-Za-z0-9])$"
+    }
   },
   "username": {
     "label": "Username",
     "type": "String",
     "required": true,
-    "help": "The SAP-HCP account Username."
+    "help": "The SAP-HCP account Username.",
+    "maxLength": 50
   },
   "password": {
     "label": "Password",
     "type": "Password",
     "required": true,
-    "help": "The SAP-HCP Password."
+    "help": "The SAP-HCP Password.",
+    "maxLength": 50
   },
-  "message_type": {
+  "messageType": {
     "label": "Message Type(ID)",
     "type": "String",
     "required": true,
-    "help": "The Message Type(ID) to use."
+    "help": "The Message Type(ID) to use.",
+    "maxLength": 80
   }
 }
